@@ -9,15 +9,43 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) var moc
-    @FetchRequest(sortDescriptors: []) var books : FetchedResults<Book>
+    @FetchRequest(sortDescriptors: [SortDescriptor(\.title), SortDescriptor(\.author)]) var books : FetchedResults<Book>
     @State private var showingAddBookScreen = false
     var body: some View {
         NavigationStack
         {
-            Text("Count: \(books.count)")
-                .navigationTitle("Bookworm")
+            List
+            {
+                ForEach(books, id: \.id)
+                {
+                    book in
+                    NavigationLink
+                    {
+                        DetailView(book: book)
+                    } label: {
+                        HStack
+                        {
+                            EmojiView(rating: book.rating)
+                                .font(.largeTitle)
+                                .bold()
+                            VStack(alignment: .leading)
+                            {
+                                Text(book.title ?? "Unknown Title")
+                                    .font(.headline)
+                                Text(book.author ?? "Unknown Author")
+                                
+                            }
+                        }
+                    }
+                }
+                .onDelete(perform: delete)
+            }
                 .toolbar
             {
+                ToolbarItem(placement: .navigationBarTrailing)
+                {
+                    EditButton()
+                }
                 ToolbarItem(placement: .navigationBarTrailing)
                 {
                     Button
@@ -26,7 +54,6 @@ struct ContentView: View {
                     } label: {
                         HStack
                         {
-                            Text("Add Book")
                             Image(systemName: "plus")
                         }
                     }
@@ -36,6 +63,17 @@ struct ContentView: View {
             {
                 AddBookView()
             }
+            .navigationTitle("Bookworm")
+        }
+    }
+    
+    func delete(at offSets : IndexSet)
+    {
+        for book in offSets
+        {
+            let bookToDelete = books[book]
+            moc.delete(bookToDelete)
+            try? moc.save()
         }
     }
 }
