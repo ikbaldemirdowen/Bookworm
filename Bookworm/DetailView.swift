@@ -39,7 +39,7 @@ struct DetailView: View {
         }
         .navigationTitle(book.title ?? "Unknown Book")
         .navigationBarTitleDisplayMode(.inline)
-        .alert("Delete book?", isPresented: $showingAlert)
+        .alert("Delete book??", isPresented: $showingAlert)
         {
             Button("Delete", role: .destructive, action: delete)
             Button("Cancel", role: .cancel) {}
